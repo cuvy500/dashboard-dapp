@@ -17,7 +17,7 @@ const App = () => {
   const [visible, setVisible] = useState(false);
   const [modalToken, setModalToken] = useState();
 
-// eslint-disable-next-line
+
   async function getRatio(tick, setPerc) {
 
     const Votes = Moralis.Object.extend("Votes");
@@ -36,8 +36,26 @@ const App = () => {
       getRatio("BTC", setBtc);
       getRatio("ETH", setEth);
       getRatio("LINK", setLink);
+
+      async function createLiveQuery() {
+        let query = new Moralis.Query('Votes');
+        let subscription = await query.subscribe();
+        subscription.on('update', (object) => {
+
+          if (object.attributes.ticker === "LINK") {
+            getRatio("LINK", setLink);
+          } else if (object.attributes.ticker === "ETH") {
+            getRatio("ETH", setEth);
+          } else if (object.attributes.ticker === "BTC") {
+            getRatio("BTC", setBtc);
+          }
+
+        })
+      }
+
+      createLiveQuery();
     }
-    // eslint-disable-next-line
+
   }, [isInitialized]);
 
 
@@ -56,7 +74,7 @@ const App = () => {
     if (modalToken) {
       fetchTokenPrice()
     }
-// eslint-disable-next-line
+    // eslint-disable-next-line
   }, [modalToken]);
 
   return (
